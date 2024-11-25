@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Button } from "../components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "../components/ui/card"
-import { Progress } from "../components/ui/progress"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
+import { Progress } from "@/components/ui/progress"
 import { Wifi, Building, AlertTriangle } from 'lucide-react'
 
 type Building = {
@@ -46,8 +46,8 @@ export default function Game() {
         x: Math.random() * (rect.width - 24),
         y: Math.random() * (rect.height - 24)
       }
-      setBuildings([...buildings, newBuilding])
-      setMoney(money - 2000)
+      setBuildings(prev => [...prev, newBuilding])
+      setMoney(prev => prev - 2000)
     }
   }
 
@@ -60,27 +60,17 @@ export default function Game() {
         x: Math.random() * (rect.width - 32),
         y: Math.random() * (rect.height - 32)
       }
-      setTowers([...towers, newTower])
-      setMoney(money - 4000)
+      setTowers(prev => [...prev, newTower])
+      setMoney(prev => prev - 4000)
     }
   }
 
   const upgradeTower = (index: number) => {
     if (money < 3000) return
-    const updatedTowers = [...towers]
-    updatedTowers[index].level += 1
-    setTowers(updatedTowers)
-    setMoney(money - 3000)
-  }
-
-  const upgradeBuilding = (index: number) => {
-    const building = buildings[index];
-    const upgradeCost = 2000 * building.level;
-    if (money < upgradeCost) return;
-    const updatedBuildings = [...buildings];
-    updatedBuildings[index] = { ...building, level: building.level + 1 };
-    setBuildings(updatedBuildings);
-    setMoney(money - upgradeCost);
+    setTowers(prev => prev.map((tower, i) => 
+      i === index ? { ...tower, level: tower.level + 1 } : tower
+    ))
+    setMoney(prev => prev - 3000)
   }
 
   const calculateNetworkCoverage = () => {
@@ -171,12 +161,12 @@ export default function Game() {
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card className="w-full max-w-4xl mx-auto mt-8 p-6">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold text-center">联通智慧城市</CardTitle>
+        <CardTitle className="text-3xl font-bold text-center">联通智慧城市</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 gap-2 text-sm">
+      <CardContent className="space-y-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-lg">
           <div>人口: {population.toLocaleString()}</div>
           <div>满意度: {satisfaction.toFixed(1)}%</div>
           <div>资金: ¥{money.toLocaleString()}</div>
@@ -184,7 +174,7 @@ export default function Game() {
         </div>
         <div 
           ref={gameAreaRef}
-          className="relative w-full aspect-[20/9] bg-gray-100 rounded-lg overflow-hidden border-2 border-gray-300"
+          className="relative w-full h-[300px] bg-gray-100 rounded-lg overflow-hidden border-2 border-gray-300"
         >
           {buildings.map((building, index) => (
             <div key={`building-${index}`} className="absolute" style={{ left: building.x, top: building.y }}>
@@ -194,12 +184,6 @@ export default function Game() {
                   building.type === 'commercial' ? 'text-blue-500' : 'text-yellow-500'
                 }`}
               />
-              <button
-                onClick={() => upgradeBuilding(index)}
-                className="absolute top-full left-1/2 transform -translate-x-1/2 bg-blue-500 text-white text-xs px-1 rounded"
-              >
-                升级 (¥{2000 * building.level})
-              </button>
             </div>
           ))}
           {towers.map((tower, index) => (
@@ -214,7 +198,7 @@ export default function Game() {
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Button onClick={() => addBuilding('residential')} disabled={money < 2000}>
             <Building className="w-4 h-4 mr-2" />
             住宅 (¥2000)
@@ -240,9 +224,9 @@ export default function Game() {
           <Progress value={calculateNetworkCoverage()} />
         </div>
         {currentEvent && (
-          <div className="bg-yellow-100 p-2 rounded-md flex items-center">
-            <AlertTriangle className="w-5 h-5 mr-2 text-yellow-500" />
-            <span className="text-sm">
+          <div className="bg-yellow-100 p-4 rounded-md flex items-center">
+            <AlertTriangle className="w-6 h-6 mr-2 text-yellow-500" />
+            <span>
               {currentEvent.type === 'network_outage' && '网络故障！满意度下降中'}
               {currentEvent.type === 'population_boom' && '人口激增！'}
               {currentEvent.type === 'economic_crisis' && '经济危机！资金减少中'}
@@ -251,24 +235,24 @@ export default function Game() {
           </div>
         )}
         <div className="mt-4">
-          <h3 className="text-lg font-semibold">成就：</h3>
+          <h3 className="text-xl font-semibold mb-2">成就：</h3>
           <ul className="list-disc list-inside">
             {achievements.map((achievement, index) => (
-              <li key={index} className="text-sm">{achievement}</li>
+              <li key={index}>{achievement}</li>
             ))}
           </ul>
         </div>
       </CardContent>
       {gameOver && (
-        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <Card className="w-64">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <Card className="w-96">
             <CardHeader>
-              <CardTitle className="text-xl font-bold text-center">游戏结束</CardTitle>
+              <CardTitle className="text-2xl font-bold text-center">游戏结束</CardTitle>
             </CardHeader>
             <CardContent className="text-center">
-              <p>您的城市发展了 {day} 天</p>
-              <p>最终人口: {population.toLocaleString()}</p>
-              <p>最终满意度: {satisfaction.toFixed(1)}%</p>
+              <p className="mb-2">您的城市发展了 {day} 天</p>
+              <p className="mb-2">最终人口: {population.toLocaleString()}</p>
+              <p className="mb-2">最终满意度: {satisfaction.toFixed(1)}%</p>
             </CardContent>
             <CardFooter className="justify-center">
               <Button onClick={restartGame}>再玩一次</Button>
