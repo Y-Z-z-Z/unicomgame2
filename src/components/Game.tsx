@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
+import { Button } from "../components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "../components/ui/card"
+import { Progress } from "../components/ui/progress"
 import { Wifi, Building, AlertTriangle } from 'lucide-react'
 
 type Building = {
